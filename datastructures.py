@@ -35,10 +35,11 @@ class Graph:
         visited = {} 
         visited[node.Value] = node
 
+    
         while stack:
             current_node = stack.pop()
             if Show:
-                print(current_node.Value, current_node.Adjacent)
+                print(current_node.Value, current_node.Adjacent, "\n")
             visited[current_node.Value] = current_node
             if current_node.Adjacent is not None and current_node.Adjacent:
                 for i in current_node.Adjacent:
@@ -48,14 +49,17 @@ class Graph:
         return visited
 
 
-    def dfs(self, node):
+    def dfs(self, node, history = False):
         stack = [self.rootNode]
         visited = {}
         visited[self.rootNode.Value] = self.rootNode
         while stack:
             current = stack.pop()
             if current.Value == node:
-                return current
+                if history == True:
+                    return current, visited
+                else:
+                    return current
             if current.Adjacent is not None and current.Adjacent:
                 for i in current.Adjacent:
                     adjacent_node = current.Adjacent[i][0]
