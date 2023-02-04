@@ -188,6 +188,18 @@ class Rect:
     def Collision(self):
         pass
 
+class Line():
+    def __init__(self, screen, color, start, end, width):
+        self.color = color
+        self.screen = screen
+        self.start = start
+        self.end = end
+        self.width = width
+        MainRenderQueue.Push(self)
+    
+    def Redraw(self):
+        pygame.draw.line(self.screen, self.color, self.start, self.end, self.width) 
+
 class Ball():
     def __init__(self, screen, radius, color1, Pos, Render = True):
         self.pos = Pos
@@ -295,6 +307,8 @@ class grid:
 
         self.colorHistory = []
 
+        self.regionColorHistory = {}
+
     def generate(self, screen):
         for i in range(self._screenH):
             for z in range(self._screenW):
@@ -322,8 +336,17 @@ class grid:
 
     def refreshColours(self):
         for region in self.colorHistory:
-          for x in range(region[1][0], region[1][1]):
+          for x in range(region[1][0], region[1][1]): #Y axis
             for z in range(region[0][0], region[0][1]): #on the x axis
                 self.grid[x][z].c1 = (self.colors[0])
         
         self.colorHistory = []
+    
+    def refreshRegion(self, region, oldColors = False):
+        if not oldColors:
+            oldColors = (self.colors[0])
+        for i in self.regionColorHistory[region]:
+            self.grid[i[1]][i[0]].c1 = (oldColors)
+    
+    def refreshBlock(self, pos):
+        self.grid[pos[1]][pos[0]].c1 = (self.colors[0])
