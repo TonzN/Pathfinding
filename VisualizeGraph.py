@@ -157,7 +157,7 @@ print("G to print out the graph \n")
 print("P to find shortest path to node || hover over node \n")
 print("B to just color a square grey || Not important tbh\n")
 
-
+displayGraph()
 
 while True: 
     window.NextFrame()
