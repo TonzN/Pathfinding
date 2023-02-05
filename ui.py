@@ -350,4 +350,3 @@ class grid:
     
     def refreshBlock(self, pos):
         self.grid[pos[1]][pos[0]].c1 = (self.colors[0])
-
