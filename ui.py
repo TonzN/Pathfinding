@@ -295,25 +295,25 @@ class grid:
         ]
         self.pattern = pattern
         self.cellSize = cellsize
-        self.border = False
-        self.borderThickness = 2
-        self.spacing = 0
+        self.border = False 
+        self.borderThickness = 2 
+        self.spacing = 0 #spacing between each cell
         self.borderColor = (20,20,20)
         self._screenW = int(np.floor(windowsize[0]/cellsize))
         self._screenH = int(np.floor(windowsize[1]/cellsize))
         self._pos = np.zeros((self._screenW, self._screenH))
 
-        self.grid = [[] for i in range(int(np.floor(windowsize[1]/cellsize)))]
+        self.grid = [[] for i in range(int(np.floor(windowsize[1]/cellsize)))] #makes the grid layout
 
-        self.colorHistory = []
+        self.colorHistory = [] 
 
-        self.regionColorHistory = {}
+        self.regionColorHistory = {}  #Access regions color history
 
     def generate(self, screen):
         for i in range(self._screenH):
             for z in range(self._screenW):
                 color = self.colors[0]
-                if (i+z)%2==0 and self.pattern == True:
+                if (i+z)%2==0 and self.pattern == True: #makes checker patternsS
                     color = self.colors[1]
                 button = Button(screen, z*self.cellSize, i*self.cellSize, self.cellSize, self.cellSize, color, color)
                 if self.border:
@@ -342,11 +342,11 @@ class grid:
         
         self.colorHistory = []
     
-    def refreshRegion(self, region, oldColors = False):
-        if not oldColors:
+    def refreshRegion(self, region, oldColors = False): #refres a region of cells region --> key 
+        if not oldColors: #so you can revert to default colorS
             oldColors = (self.colors[0])
         for i in self.regionColorHistory[region]:
-            self.grid[i[1]][i[0]].c1 = (oldColors)
+            self.grid[i[1]][i[0]].c1 = (oldColors) 
     
     def refreshBlock(self, pos):
         self.grid[pos[1]][pos[0]].c1 = (self.colors[0])
