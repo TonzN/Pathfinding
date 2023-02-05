@@ -1,5 +1,6 @@
 import ui
-
+import math
+import heapq
 
 class PriorityQueue:
     def __init__(self):
@@ -18,6 +19,7 @@ class Graph:
         self.rootNode = g_Node() 
         self.UnConnected = {}   
         self.searchForNode = False #Only for visualization purposes
+        self.RunDjikstra = False # --^^--
     
     def AddUnConnected(self, node): #unconnected nodes --> no edges 
         self.UnConnected[node.Value] = node
@@ -39,7 +41,7 @@ class Graph:
         else:
             sumA = node.Pos[0] + node.Pos[1]
             sumB = newNode.Pos[0] + newNode.Pos[1]
-            distance = sumB-sumA
+            distance = abs(sumB-sumA)
             node.Adjacent[newNode.Value] = [newNode, distance] # [node, edgedistance] 
             newNode.Adjacent[node.Value] = [node, distance] 
             print("CONNECTED", node.Value, newNode.Value)
@@ -93,8 +95,39 @@ class Graph:
      #   print("Did not find node!")
         return False
 
-    def djikstras(Start, End):
-        pass        
+    def djikstras(self, Start, Target, Visualize = False):
+        nodes = self.get(Start)
+        distances = {node: float("infinity") for node in nodes}
+        distances[Start.Value] = 0
+        previous = {node: None for node in nodes}
 
+        queue = [(0, Start.Value)]
+
+        while queue:
+            current_distance, current_Node = heapq.heappop(queue) #gets highest priority node --> shortest distance
+
+            if current_Node == Target:
+                break
+
+            if current_distance > distances[current_Node]:
+                continue
+            
+            for neighbor, adjacent in nodes[current_Node].Adjacent.items(): #gets the neighbor and adjacent variables
+                distance = current_distance + adjacent[1] #adds distance so you get the total distance from start to the adjacent 
+
+                if distance < distances[neighbor]: #if the distance is shorter it adds it to the priority queue and previous which is used to make the path
+                    distances[neighbor] = distance
+                    previous[neighbor] = current_Node
+                    heapq.heappush(queue, (distance, neighbor))
+            
+            
+        path = []
+        current = Target
+        while current is not None:
+            path.append(current)
+            current = previous[current]
+
+        path.reverse()
+        return path
 
 
