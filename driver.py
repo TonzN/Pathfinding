@@ -7,11 +7,11 @@ import datastructures as ds
 window = ui.NewWindow("PathFinding", )
 window.BGColor = (0,0,0)
 screen = window.screen
-
+cellSize = 40
 
 def buildObst():
     mPos = window.mousepos
-    xPos, yPos = math.floor(mPos[0]/20), math.floor(mPos[1]/20)
+    xPos, yPos = math.floor(mPos[0]/cellSize), math.floor(mPos[1]/cellSize)
     grid.colorBlock((xPos, yPos), (150,150,150))
     #print(xPos, yPos)
 
@@ -23,12 +23,12 @@ def displayGraph():
     #For drawing nodes 
     listGraph = graph.get(graph.rootNode)
     for i in listGraph: #displays all the connected nodes of the graphS
-        xPos, yPos = math.floor(listGraph[i].Pos[0]/20), math.floor(listGraph[i].Pos[1]/20) #turns positions into grid location x, y 
+        xPos, yPos = math.floor(listGraph[i].Pos[0]/cellSize), math.floor(listGraph[i].Pos[1]/cellSize) #turns positions into grid location x, y 
         # /size of cells
         grid.colorBlock((xPos, yPos), (50,50,200))
     
     for i in graph.UnConnected:
-        xPos, yPos = math.floor(graph.UnConnected[i].Pos[0]/20), math.floor(graph.UnConnected[i].Pos[1]/20)
+        xPos, yPos = math.floor(graph.UnConnected[i].Pos[0]/cellSize), math.floor(graph.UnConnected[i].Pos[1]/cellSize)
         grid.colorBlock((xPos, yPos), (50,50,200))
 
     connections = {}
@@ -44,8 +44,8 @@ def displayGraph():
                 connections[key] = (listGraph[i].Pos, listGraph[i].Adjacent[z][0].Pos)
     
     for i in connections: #to draw the edges"
-        start = (connections[i][0][0]+10,connections[i][0][1]+10)
-        end = (connections[i][1][0]+10,connections[i][1][1]+10)
+        start = (connections[i][0][0]+cellSize/2,connections[i][0][1]+cellSize/2)
+        end = (connections[i][1][0]+cellSize/2,connections[i][1][1]+cellSize/2)
         ui.Line(screen, (150,150,150), start, end, 4)
   
 def runFor(itr): #run just nextFrames for itr
@@ -62,7 +62,7 @@ def visualzeDFS(graph, node):
         return
 
     for i in History:
-        xPos, yPos = math.floor(History[i].Pos[0]/20), math.floor(History[i].Pos[1]/20)
+        xPos, yPos = math.floor(History[i].Pos[0]/cellSize), math.floor(History[i].Pos[1]/cellSize)
         
         if found.Pos == History[i].Pos:
             grid.colorBlock((xPos, yPos), (100,200,100)) #Color end green
@@ -80,18 +80,20 @@ def visualzeDFS(graph, node):
     grid.regionColorHistory["VisualizeDFS"] = region
     grid.refreshRegion("VisualizeDFS",  (50,50,200))
 
-
 def setDFS():
-    node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/20)*20, math.floor(window.mousepos[1]/20)*20))
+    node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize))
     if node:
         graph.searchForNode = node.Value
     else:
         graph.searchForNode = False
-    
+
+def printGraph():
+    graph.get(graph.rootNode, True)
 
 # KEYBIND SETUP
 ui.KeyBindFunctions[ui.pygame.K_b] = buildObst #To make buildObst a keybind function to b
 ui.KeyBindFunctions[ui.pygame.K_f] = setDFS
+ui.KeyBindFunctions[ui.pygame.K_p] = printGraph
 
 #-----#
 
@@ -99,7 +101,7 @@ window.Target_fps = 120
 
 SelectedNode1 = None
 
-grid = ui.grid(window.Size, 20, False)
+grid = ui.grid(window.Size, cellSize, False)
 grid.border = True
 grid.generate(screen)
 
@@ -109,26 +111,26 @@ print("--------Grid Data---------")
 print("Grid size", grid._pos.shape)
 
 
-
 # GRAPH SETUP 
 g_Node = ds.g_Node
 graph = ds.Graph()
 graph.rootNode.Pos = (360,320)
-graph.Add(graph.rootNode, g_Node("A", (340, 280)))
-graph.Add(graph.rootNode, g_Node("B", (380, 280)))
-graph.Add(graph.dfs("B"), g_Node("C", (380, 220)))
-graph.Add(graph.dfs("B"), g_Node("D", (420, 220)))
-graph.Add(graph.dfs("B"), g_Node("E", (400, 320)))
-graph.Add(graph.dfs("C"), g_Node("F", (460, 280)))
-graph.Add(graph.dfs("F"), g_Node("G", (520, 360)))
 
 
 displayGraph()
 
-while True:
+print("--------Key binds---------")
+print("Right Click: Make new node over where your mouse hover\n")
+print("Left Click to select a node to connnect --> right click to choose which to connect too || Left click again to cancel\n")
+print("F to visualize DFS, target is over mouse posititon || F on a empty square to cancel\n")
+print("P to print out the graph \n")
+print("B to just color a square grey || Not important tbh\n")
+
+
+while True: 
     window.NextFrame()
 
-    pos = (math.floor(window.mousepos[0]/20)*20, math.floor(window.mousepos[1]/20)*20)
+    pos = (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize)
     
     if window.rightclick():
         if not SelectedNode1:
@@ -158,7 +160,7 @@ while True:
                 SelectedNode1 = graph.findUnconnected(False, pos)
             
             if SelectedNode1:
-                print(SelectedNode1.Value)
+                print("SELECTED NODE -->", SelectedNode1.Value, "\n")
                 
         else:
             SelectedNode1 = None
@@ -167,3 +169,4 @@ while True:
     if graph.searchForNode:
         visualzeDFS(graph, graph.searchForNode)
     
+
