@@ -72,13 +72,36 @@ def visualzeDFS(graph, node):
 
         else:
             grid.colorBlock((xPos, yPos), (200,100,100)) #rest red
+            region.append((xPos, yPos))
 
-        region.append((xPos, yPos))
-        
         runFor(10)
     
     grid.regionColorHistory["VisualizeDFS"] = region
     grid.refreshRegion("VisualizeDFS",  (50,50,200))
+
+def visualizeDjistras(graph, path, target):
+    region = []
+    nodes = graph.get(graph.rootNode)
+    print("PATH", path)
+
+    for i in path:
+        xPos, yPos = math.floor(nodes[i].Pos[0]/cellSize), math.floor(nodes[i].Pos[1]/cellSize)
+
+        if i == target:
+            grid.colorBlock((xPos, yPos), (100,200,100))
+            region.append((xPos, yPos))
+            runFor(30)
+            break
+
+        else:
+            grid.colorBlock((xPos, yPos), (200,100,100)) #rest red
+            region.append((xPos, yPos))
+
+        runFor(10)
+    
+    grid.regionColorHistory["VisualizeDFS"] = region
+    grid.refreshRegion("VisualizeDFS",  (50,50,200))
+
 
 def setDFS():
     node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize))
@@ -90,10 +113,19 @@ def setDFS():
 def printGraph():
     graph.get(graph.rootNode, True)
 
+def setDjikstras():
+    node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize))
+    if node:
+        graph.RunDjikstra = node.Value
+    else:
+        graph.RunDjikstra = False
+
 # KEYBIND SETUP
 ui.KeyBindFunctions[ui.pygame.K_b] = buildObst #To make buildObst a keybind function to b
 ui.KeyBindFunctions[ui.pygame.K_f] = setDFS
-ui.KeyBindFunctions[ui.pygame.K_p] = printGraph
+ui.KeyBindFunctions[ui.pygame.K_g] = printGraph
+ui.KeyBindFunctions[ui.pygame.K_p] = setDjikstras
+
 
 #-----#
 
@@ -107,7 +139,7 @@ grid.generate(screen)
 
 #grid.colorRegion([[10, 20], [20,30]], (255,0,0))
 
-print("--------Grid Data---------")
+print("\n--------Grid Data---------")
 print("Grid size", grid._pos.shape)
 
 
@@ -117,14 +149,14 @@ graph = ds.Graph()
 graph.rootNode.Pos = (360,320)
 
 
-displayGraph()
-
-print("--------Key binds---------")
+print("\n--------Key binds---------")
 print("Right Click: Make new node over where your mouse hover\n")
 print("Left Click to select a node to connnect --> right click to choose which to connect too || Left click again to cancel\n")
 print("F to visualize DFS, target is over mouse posititon || F on a empty square to cancel\n")
-print("P to print out the graph \n")
+print("G to print out the graph \n")
+print("P to find shortest path to node || hover over node \n")
 print("B to just color a square grey || Not important tbh\n")
+
 
 
 while True: 
@@ -149,8 +181,7 @@ while True:
                 print("CONNECTING")
                 graph.Add(SelectedNode1, graph.findUnconnected(False, pos))
                 displayGraph()
-    
-   
+     
     if window.leftclick():
         if not SelectedNode1:
             node = graph.dfs(False, False, False, pos)
@@ -168,5 +199,10 @@ while True:
     
     if graph.searchForNode:
         visualzeDFS(graph, graph.searchForNode)
-    
+        graph.searchForNode = False
 
+    if graph.RunDjikstra:
+        path = graph.djikstras(graph.rootNode, graph.RunDjikstra, True)
+        visualizeDjistras(graph, path, graph.RunDjikstra)
+        graph.RunDjikstra = False
+    
