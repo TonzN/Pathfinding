@@ -30,7 +30,7 @@ class Graph:
                 return self.UnConnected[i]
             elif self.UnConnected[i].Value == value:
                 return self.UnConnected[i]
-        print("DID NOT FIND")
+       # print("DID NOT FIND")
         return False
 
     def Add(self, node, newNode): #Undirected --> makes connections not nodes!
@@ -90,10 +90,11 @@ class Graph:
                         stack.append(adjacent_node)
                         visited[adjacent_node.Value] = adjacent_node
      
-        print("Did not find node!")
+     #   print("Did not find node!")
         return False
 
     def djikstras(Start, End):
         pass        
+
 
 
