@@ -1,6 +1,10 @@
 You paste the code into a python file, call it whatever you want.
 Its for 2d ui only !! NEEDS PYGAME
 
+NOTE-------> This small lightweight library is only intended to make Ui easy and fast to make with some added features that gets automatically handled, 
+polygons, sprites and pixel management is not included. You have to manually code what the ui elements do. 
+
+
 Import the code from another python file e.g driver code: import ui
 
 Create window --> var = NewWindow(name, fps = 60, backgroundcolor, size)
