@@ -1,0 +1,61 @@
+You paste the code into a python file, call it whatever you want.
+Its for 2d ui only !! NEEDS PYGAME
+
+Import the code from another python file e.g driver code: import ui
+
+Create window --> var = NewWindow(name, fps = 60, backgroundcolor, size)
+
+Run Window --> while ... do:
+                   window.NextFrame(Optional: layers) | window is the var for the created window. Layers have to be lists --> [rendersques....] 
+                   
+Every UI object e.g rects are automatically added to a **MainRenderQueue**, you can choose if you wanna add the objects to another layer. 
+
+NewLayer: ui.RenderQueue(Optional: List) 
+RenderQueue: Pop, Push, Remove
+
+Handling of priority of layers and all the ui objects created to be rendered is done automativally with .NextFrame()
+
+pos = (x,y)
+
+screen: The screen of the window --> all objects needs the screen to be passed for them to work  | window.screen
+
+Features:
+  Rect
+  Button
+  TextLabel
+  Frame
+  Grid
+  Image
+  Ball
+  Line (between two points)
+ 
+ KeyBinding: KeybindFunctions[key] = function
+ 
+ EventHandler: Automatically handles events such as exiting the window and keybinds or cliking
+ 
+ EndPygame: Closes the game and exits python
+ 
+ RunEvents: RunEvents(List: List containing ui elements that has a .CheckEvent()), functions can not return. 
+ 
+ CheckEvents(): Checks if the ui element satisfies the requirement to run an event: 
+ Containing CheckEvents() --> Button
+ 
+ Button.RunEvent(): Runs a function that returns and can use inputs
+ 
+ Image: image(screen, file location of image, pos, width, height)
+ 
+ Grid: grid(size of grid, size of cells, pattern--> checker pattern) --> lets you create a grid object and customize its parameters before generating it.  | grid.grid[Vertical][Horizontal] 
+       grid.generate() --> generates the grid and adds to mainrenderqueue 
+       .border --> if you want borders
+       .borderThickness --> how thick the borders are
+       .borderColor -->
+       .regionColorHistory --> add cells you recently changed colors to into its own list, useful for grouping colors you changed and be able to revert back the colros
+       .refreshRegion --> refreshses the uis in regionColorHistory
+       .ColorBlock() --> colors a single cell
+       .ColorRegion --> region = [pos1, pos2] --> draws from pos1 to pos2
+       .RefreshBlock() --> self explainatory
+       
+ All ui elements has a .Redraw() function, its ran everytime NextFrame is called. Ui wont be drawn if its not run and any changes wont be shown either
+ 
+ 
+  
