@@ -7,104 +7,118 @@ import datastructures as ds
 window = ui.NewWindow("PathFinding", )
 window.BGColor = (0,0,0)
 screen = window.screen
-cellSize = 40
+cellSize = 10
+screen_size = window.Size
+frameskip = 60
+layerskips = 3
+window.Target_fps = 120
+
+NODE_COLOR = (50,50,200)
+ROOT_COLOR = (200,50,50)
+HOVER_COLOR = (50,200,100)
+PATH_COLOR = (200,100,100)
+TARGET_COLOR = (100,200,100)
 
 def buildObst():
     mPos = window.mousepos
     xPos, yPos = math.floor(mPos[0]/cellSize), math.floor(mPos[1]/cellSize)
     grid.colorBlock((xPos, yPos), (150,150,150))
-    #print(xPos, yPos)
 
 def sortString(str):
     return ''.join(sorted(str))
 
+def getMousePos():
+    return (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize)
+
+def getMouseNode():
+    return node_by_pos.get(getMousePos())
+
 #FOR UNDIRECTED GRAPHS!!
 def displayGraph():
-    #For drawing nodes 
-    listGraph = graph.get(graph.rootNode)
-    for i in listGraph: #displays all the connected nodes of the graphS
-        xPos, yPos = math.floor(listGraph[i].Pos[0]/cellSize), math.floor(listGraph[i].Pos[1]/cellSize) #turns positions into grid location x, y 
-        # /size of cells
-        grid.colorBlock((xPos, yPos), (50,50,200))
-    
-    for i in graph.UnConnected:
-        xPos, yPos = math.floor(graph.UnConnected[i].Pos[0]/cellSize), math.floor(graph.UnConnected[i].Pos[1]/cellSize)
-        grid.colorBlock((xPos, yPos), (50,50,200))
+    for pos in node_by_pos:
+        xPos, yPos = pos[0]//cellSize, pos[1]//cellSize
+        grid.colorBlock((xPos, yPos), NODE_COLOR)
 
-    connections = {}
+    #root node always red
+    xPos, yPos = graph.rootNode.Pos[0]//cellSize, graph.rootNode.Pos[1]//cellSize
+    grid.colorBlock((xPos, yPos), ROOT_COLOR)
 
-    for i in graph.UnConnected:
-        listGraph[i] = graph.UnConnected[i]
-    
-        
-    for i in listGraph: #adds the edges to connectionsS
-        for z in listGraph[i].Adjacent:
-            key = sortString(str(listGraph[i].Value) + str(listGraph[i].Adjacent[z][0].Value)) #sorts the keynames alphabethically so duplicate connections dont happenS
-            if not key in connections:
-                connections[key] = (listGraph[i].Pos, listGraph[i].Adjacent[z][0].Pos)
-    
-    for i in connections: #to draw the edges"
-        start = (connections[i][0][0]+cellSize/2,connections[i][0][1]+cellSize/2)
-        end = (connections[i][1][0]+cellSize/2,connections[i][1][1]+cellSize/2)
-        ui.Line(screen, (150,150,150), start, end, 4)
-  
 def runFor(itr): #run just nextFrames for itr
     counter = 0
-    while counter <= itr: 
+    while counter <= itr:
         counter += 1
         window.NextFrame()
 
 def visualzeDFS(graph, node):
     found, History = graph.dfs(node, False, True)
     region = []
-     
+    cntr = 0
+
     if History == False:
         return
 
+    cntr2 = 0
     for i in History:
+        cntr2 += 1
         xPos, yPos = math.floor(History[i].Pos[0]/cellSize), math.floor(History[i].Pos[1]/cellSize)
-        
+
         if found.Pos == History[i].Pos:
-            grid.colorBlock((xPos, yPos), (100,200,100)) #Color end green
+            grid.colorBlock((xPos, yPos), TARGET_COLOR)
             region.append((xPos, yPos))
-            runFor(30)
+            cntr += 1
+            if cntr >= frameskip:
+                runFor(1)
+                cntr = 0
             break
-
         else:
-            grid.colorBlock((xPos, yPos), (200,100,100)) #rest red
+            grid.colorBlock((xPos, yPos), PATH_COLOR)
             region.append((xPos, yPos))
 
-        runFor(10)
-    
+        if cntr2 >= layerskips:
+            cntr2 = 0
+            runFor(1)
+
     grid.regionColorHistory["VisualizeDFS"] = region
-    grid.refreshRegion("VisualizeDFS",  (50,50,200))
+    grid.refreshRegion("VisualizeDFS", NODE_COLOR)
+    displayGraph()
 
 def visualizeDjistras(graph, path, target):
     region = []
     nodes = graph.get(graph.rootNode)
     print("PATH", path)
+    cntr = 0
+    cntr2 = 0
 
     for i in path:
+        cntr2 += 1
+        if i not in nodes:
+            continue
+
         xPos, yPos = math.floor(nodes[i].Pos[0]/cellSize), math.floor(nodes[i].Pos[1]/cellSize)
 
         if i == target:
-            grid.colorBlock((xPos, yPos), (100,200,100))
+            grid.colorBlock((xPos, yPos), TARGET_COLOR)
             region.append((xPos, yPos))
-            runFor(30)
+            cntr += 1
+            if cntr >= frameskip:
+                runFor(1)
+                cntr = 0    
             break
-
         else:
-            grid.colorBlock((xPos, yPos), (200,100,100)) #rest red
+            grid.colorBlock((xPos, yPos), PATH_COLOR)
             region.append((xPos, yPos))
 
-        runFor(10)
-    
-    grid.regionColorHistory["VisualizeDFS"] = region
-    grid.refreshRegion("VisualizeDFS",  (50,50,200))
+        if cntr2 >= layerskips:
+            cntr2 = 0
+            runFor(1)
 
+    grid.regionColorHistory["VisualizeDjikstra"] = region
+    grid.refreshRegion("VisualizeDjikstra", NODE_COLOR)
+    displayGraph()
 
 def setDFS():
-    node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize))
+    node = getMouseNode()
+
     if node:
         graph.searchForNode = node.Value
     else:
@@ -114,40 +128,118 @@ def printGraph():
     graph.get(graph.rootNode, True)
 
 def setDjikstras():
-    node = graph.dfs(False, False, False, (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize))
+    node = getMouseNode()
+
     if node:
         graph.RunDjikstra = node.Value
     else:
         graph.RunDjikstra = False
 
+def full_connect_graph():
+    global node_by_pos
+
+    cols = window.Size[0] // cellSize
+    rows = window.Size[1] // cellSize
+    node_by_pos = {}
+
+    #create nodes with around 70% probability
+    for y in range(rows):
+        for x in range(cols):
+            if random.randint(0,100) < 30:
+                continue
+
+            pos = (x*cellSize, y*cellSize)
+            name = f"{x}_{y}" #unique node value based on position
+
+            node = g_Node(name, pos)
+            graph.AddUnConnected(node)
+            node_by_pos[pos] = node
+
+    if not node_by_pos:
+        return
+
+    #pick random root node
+    graph.rootNode = random.choice(list(node_by_pos.values()))
+
+    #connect nodes only to nodes directly right/below
+    #assuming Graph.Add makes the connection undirected
+    for pos, node in node_by_pos.items():
+        x = pos[0] // cellSize
+        y = pos[1] // cellSize
+
+        pos_right = ((x+1)*cellSize, y*cellSize)
+        pos_below = (x*cellSize, (y+1)*cellSize)
+
+        right_node = node_by_pos.get(pos_right)
+        below_node = node_by_pos.get(pos_below)
+
+        if right_node:
+            graph.Add(node, right_node)
+
+        if below_node:
+            graph.Add(node, below_node)
+
+def updateHover():
+    global previous_hover
+
+    pos = getMousePos()
+
+    if pos == previous_hover:
+        return
+
+    #reset previous hovered node
+    if previous_hover:
+        node = node_by_pos.get(previous_hover)
+
+        if node:
+            xPos, yPos = previous_hover[0]//cellSize, previous_hover[1]//cellSize
+
+            if node == graph.rootNode:
+                grid.colorBlock((xPos, yPos), ROOT_COLOR)
+            else:
+                grid.colorBlock((xPos, yPos), NODE_COLOR)
+
+    #color current hovered node green
+    node = node_by_pos.get(pos)
+
+    if node:
+        xPos, yPos = pos[0]//cellSize, pos[1]//cellSize
+
+        if node == graph.rootNode:
+            grid.colorBlock((xPos, yPos), ROOT_COLOR)
+        else:
+            grid.colorBlock((xPos, yPos), HOVER_COLOR)
+
+    previous_hover = pos
+
+
 # KEYBIND SETUP
-ui.KeyBindFunctions[ui.pygame.K_b] = buildObst #To make buildObst a keybind function to b
+ui.KeyBindFunctions[ui.pygame.K_b] = buildObst
 ui.KeyBindFunctions[ui.pygame.K_f] = setDFS
 ui.KeyBindFunctions[ui.pygame.K_g] = printGraph
 ui.KeyBindFunctions[ui.pygame.K_p] = setDjikstras
-
 
 #-----#
 
 window.Target_fps = 120
 
 SelectedNode1 = None
+previous_hover = None
 
 grid = ui.grid(window.Size, cellSize, False)
-grid.border = True
+grid.border = False
+grid.EnableNode = True
 grid.generate(screen)
-
-#grid.colorRegion([[10, 20], [20,30]], (255,0,0))
 
 print("\n--------Grid Data---------")
 print("Grid size", grid._pos.shape)
 
-
-# GRAPH SETUP 
+# GRAPH SETUP
 g_Node = ds.g_Node
 graph = ds.Graph()
-graph.rootNode.Pos = (360,320)
 
+full_connect_graph()
+displayGraph()
 
 print("\n--------Key binds---------")
 print("Right Click: Make new node over where your mouse hover\n")
@@ -157,46 +249,39 @@ print("G to print out the graph \n")
 print("P to find shortest path to node || hover over node \n")
 print("B to just color a square grey || Not important tbh\n")
 
-displayGraph()
-
-while True: 
+while True:
     window.NextFrame()
+    updateHover()
 
-    pos = (math.floor(window.mousepos[0]/cellSize)*cellSize, math.floor(window.mousepos[1]/cellSize)*cellSize)
-    
+    pos = getMousePos()
+
     if window.rightclick():
         if not SelectedNode1:
-            x = random.choice(string.ascii_letters)
-            x2 = random.choice(string.ascii_letters)
-            x3 = random.choice(string.ascii_letters)
-            graph.AddUnConnected(g_Node(x+x2+x3, pos))
-            displayGraph()
+            if pos not in node_by_pos:
+                name = ''.join(random.choice(string.ascii_letters) for _ in range(3))
+                node = g_Node(name, pos)
+
+                graph.AddUnConnected(node)
+                node_by_pos[pos] = node
+                displayGraph()
         else:
-            node = graph.dfs(False, False, False, pos)
+            node = node_by_pos.get(pos)
+
             if node:
                 print("CONNECTING")
                 graph.Add(SelectedNode1, node)
                 displayGraph()
-            elif graph.findUnconnected(False, pos):
-                print("CONNECTING")
-                graph.Add(SelectedNode1, graph.findUnconnected(False, pos))
-                displayGraph()
-     
+
     if window.leftclick():
         if not SelectedNode1:
-            node = graph.dfs(False, False, False, pos)
+            node = node_by_pos.get(pos)
+
             if node:
                 SelectedNode1 = node
-            elif graph.findUnconnected(False, pos):
-                SelectedNode1 = graph.findUnconnected(False, pos)
-            
-            if SelectedNode1:
                 print("SELECTED NODE -->", SelectedNode1.Value, "\n")
-                
         else:
             SelectedNode1 = None
-        
-    
+
     if graph.searchForNode:
         visualzeDFS(graph, graph.searchForNode)
         graph.searchForNode = False
@@ -205,4 +290,3 @@ while True:
         path = graph.djikstras(graph.rootNode, graph.RunDjikstra, True)
         visualizeDjistras(graph, path, graph.RunDjikstra)
         graph.RunDjikstra = False
-    
