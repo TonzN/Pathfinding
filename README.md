@@ -19,4 +19,4 @@ Programmet genererer en tilfeldig grid-basert graf der enkelte noder mangler og 
 - Grafalgoritmer
 - Datastrukturer
 
-- ![Demo Animation](pathfindding.gif)
+- ![Demo Animation](pathfinding.gif)
